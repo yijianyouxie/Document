@@ -1,0 +1,57 @@
+Excute Windows bathc command
+taskkill /F /IM Unity.exe
+
+set path1=%UnityProjectPath%/Assets
+set path2=%UnityProjectPath%/StreamingAssets
+set path3=%UnityProjectPath%/Assets/Res
+set path4=%UnityProjectPath%/FlatBufferOutputResult
+set path5=%UnityProjectPath%/../Res
+set path6=%UnityProjectPath%/ProjectSettings
+
+svn revert -R %path1%
+svn cleanup %path1%
+svn cleanup %path1%
+
+svn revert -R %path2%
+svn cleanup %path2%
+svn cleanup %path2%
+
+svn revert -R %path3%
+svn cleanup %path3%
+svn cleanup %path3%
+
+svn revert -R %path4%
+svn cleanup %path4%
+svn cleanup %path4%
+
+svn revert -R %path5%
+svn cleanup %path5%
+svn cleanup %path5%
+
+svn revert -R %path6%
+svn cleanup %path6%
+svn cleanup %path6%
+
+svn update %UnityProjectPath%\.. --username zhaoerlong_yd --password meng891120.. --accept theirs-full
+
+::copy /y %JenkinsReplaceFilePath%\mcs.rsp %UnityProjectPath%\Assets\mcs.rsp
+::copy /y %JenkinsReplaceFilePath%\PreInit.cfg %UnityProjectPath%\StreamingAssets\TLBB\PreInit.cfg
+%UnityProjectPath%\..\Tools\JenkinsTools\JenkinsTools\bin\Debug\JenkinsTools.exe TextEditor.Delete %UnityProjectPath%\Assets\mcs.rsp "-define:PAY_RELEASE"
+%UnityProjectPath%\..\Tools\JenkinsTools\JenkinsTools\bin\Debug\JenkinsTools.exe TextEditor.Replace %UnityProjectPath%\StreamingAssets\TLBB\PreInit.cfg "TakeListType = 2" "TakeListType = 1"
+%UnityProjectPath%\..\Tools\JenkinsTools\JenkinsTools\bin\Debug\JenkinsTools.exe TextEditor.Replace %UnityProjectPath%\StreamingAssets\TLBB\PreInit.cfg "HttpType = 2" "HttpType = 1"
+%UnityProjectPath%\..\Tools\JenkinsTools\JenkinsTools\bin\Debug\JenkinsTools.exe TextEditor.Replace %UnityProjectPath%\StreamingAssets\TLBB\PreInit.cfg "IsTencentServer = 1" "IsTencentServer = 0"
+
+if not exist %UnityErrorLogPath% (
+   md %UnityErrorLogPath%
+)
+
+
+Invoke Unity3d Editor:
+-projectPath $UnityProjectPath -nographics -quit -batchmode -executeMethod  ExportResourcePanel.JenkinsExport CustomTarget=$CustomTarget EnumChannelType=$EnumChannelType PackageType=$PackageType Version=$Version PackageSavePath=$PackageSavePath IsAutoIncreaseVersion=$IsAutoIncreaseVersion AndroidSdkPath=$AndroidSdkPath AndroidJdkPath=$AndroidJdkPath AndroidNdkPath=$AndroidNdkPath UnityErrorLogPath=$UnityErrorLogPath Development=$Development -logFile D:\BuildLog.txt
+
+
+Excute Windows bathc command
+set /P apkName=<C:\Windows\Temp\JenkinsAutoBuildTemp.txt
+set source=%PackageSavePath%\%apkName%
+set target=/home/PAIPA/Ö÷¸É°ü/JenkinsAuto2017/%apkName%
+%UnityProjectPath%\..\Tools\JenkinsTools\JenkinsTools\bin\Debug\JenkinsTools.exe Sftp.Upload 10.1.9.26 22 root Cy@sys %source% %target%
